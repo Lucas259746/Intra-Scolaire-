@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ is_granted('ROLE_TEACHER') ? 'À noter' : 'Mes notes' }}{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ is_granted('ROLE_TEACHER') ? 'À noter' : 'Mes notes' }}</h2>
+    </div>
+
+    {% if is_granted('ROLE_TEACHER') %}
+
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Projet</th>
+                    <th>Statut</th>
+                    <th>Rendu</th>
+                    <th>Mis à jour</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for grade in grades %}
+                <tr class="cursor-pointer" style="cursor:pointer;" onclick="this.querySelector('a.grade-link').click()">
+                    <td class="fw-semibold">{{ grade.student.firstname }} {{ grade.student.lastname }}</td>
+                    <td>{{ grade.project.title }}</td>
+                    <td>
+                        {% if grade.status == constant('App\\Enum\\GradeStatus::PENDING') %}
+                            <span class="badge bg-secondary">En attente</span>
+                        {% elseif grade.status == constant('App\\Enum\\GradeStatus::SUBMITTED') %}
+                            <span class="badge bg-warning text-dark">Soumis</span>
+                        {% else %}
+                            <span class="badge bg-success">Noté</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if grade.submission %}
+                            <a href="{{ grade.submission }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="event.stopPropagation()">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ grade.updateHistory ? grade.updateHistory|date('d/m/Y H:i') : '—' }}</td>
+                    <td>
+                        <a href="{{ path('app_grades_edit', {'id': grade.id}) }}"
+                           class="btn btn-outline-warning btn-sm grade-link"
+                           data-turbo-frame="main-frame">
+                            <i class="bi bi-pencil"></i> Corriger
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">Aucun rendu à corriger.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Projet</th>
+                    <th>Statut</th>
+                    <th>Note</th>
+                    <th>Commentaire</th>
+                    <th>Rendu</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for grade in grades %}
+                <tr>
+                    <td class="fw-semibold">{{ grade.project.title }}</td>
+                    <td>
+                        {% if grade.status == constant('App\\Enum\\GradeStatus::PENDING') %}
+                            <span class="badge bg-secondary">En attente de rendu</span>
+                        {% elseif grade.status == constant('App\\Enum\\GradeStatus::SUBMITTED') %}
+                            <span class="badge bg-warning text-dark">Soumis — en correction</span>
+                        {% else %}
+                            <span class="badge bg-success">Noté</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ grade.grade ?? '—' }}</td>
+                    <td>{{ grade.comments ?? '—' }}</td>
+                    <td>
+                        {% if grade.submission %}
+                            <a href="{{ grade.submission }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-1">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Aucune note enregistrée.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% endif %}
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ knp_pagination_render(grades) }}
+    </div>
+</turbo-frame>
+{% endblock %}

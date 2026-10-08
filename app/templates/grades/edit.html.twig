@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Corriger — {{ grade.student.firstname }} {{ grade.student.lastname }}{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Corriger le rendu</h2>
+        <a href="{{ path('app_grades_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Étudiant</dt>
+                <dd class="col-sm-9">{{ grade.student.firstname }} {{ grade.student.lastname }}</dd>
+                <dt class="col-sm-3">Projet</dt>
+                <dd class="col-sm-9">{{ grade.project.title }}</dd>
+                {% if grade.submission %}
+                <dt class="col-sm-3">Rendu</dt>
+                <dd class="col-sm-9">
+                    <a href="{{ grade.submission }}" target="_blank" rel="noopener">{{ grade.submission }}</a>
+                </dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    {{ form_start(form) }}
+        <div class="mb-3">
+            {{ form_label(form.grade, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.grade, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.grade) }}
+        </div>
+        <div class="mb-3">
+            {{ form_label(form.comments, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.comments, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+            {{ form_errors(form.comments) }}
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i> Enregistrer la correction
+        </button>
+    {{ form_end(form) }}
+</turbo-frame>
+{% endblock %}

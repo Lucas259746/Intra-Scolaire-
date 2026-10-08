@@ -3,10 +3,15 @@ services:
     build: .
     container_name: symfony_app
     working_dir: /var/www/html
+    command: ["sh", "-c", "mkdir -p public/uploads/documents && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction && chown -R www-data:www-data var && chown www-data:www-data public/uploads/documents && exec php-fpm"]
     volumes:
       - ./app:/var/www/html
       - app_logs:/var/log/php
       - app_cache:/var/www/html/var
+      - app_vendor:/var/www/html/vendor
+    depends_on:
+      database:
+        condition: service_healthy
     networks:
       - symfony_network
 
@@ -25,18 +30,21 @@ services:
       - symfony_network
 
   database:
-    image: mariadb:latest
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
     container_name: symfony_db
-    restart: always
     environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: symfony
-      MARIADB_USER: symfony
-      MARIADB_PASSWORD: symfony
+      POSTGRES_DB: symfony_db
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "symfony_db", "-U", "symfony"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data:rw
     networks:
       - symfony_network
 
@@ -51,25 +59,6 @@ services:
     networks:
       - symfony_network
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: symfony_phpmyadmin
-    restart: always
-    ports:
-      - "8082:80"
-    environment:
-      PMA_HOST: symfony_db
-      MYSQL_ROOT_PASSWORD: root
-      PMA_PMADB: phpmyadmin
-      PMA_CONTROLUSER: symfony
-      PMA_CONTROLPASS: symfony
-    depends_on:
-      - database
-    networks:
-      - symfony_network
-    volumes:
-      - phpmyadmin_data:/var/lib/phpmyadmin
-
 networks:
   symfony_network:
     driver: bridge
@@ -79,4 +68,5 @@ volumes:
   phpmyadmin_data:
   app_logs:
   app_cache:
+  app_vendor:
   nginx_logs:

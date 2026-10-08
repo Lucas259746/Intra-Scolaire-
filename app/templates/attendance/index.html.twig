@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 text-secondary"><i class="bi bi-people-fill me-2"></i>Mes promotions</h1>
+            <span class="badge bg-primary rounded-pill">{{ promotions|length }} promotion(s)</span>
+        </div>
+
+        {% if promotions is not empty %}
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4" style="width: 10%;">ID</th>
+                                <th scope="col" style="width: 65%;">Nom de la promotion</th>
+                                <th scope="col" class="text-end pe-4" style="width: 25%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for promotion in promotions %}
+                                <tr>
+                                    <td class="ps-4 text-muted fw-bold">#{{ promotion.id }}</td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">{{ promotion.name }}</span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{{ path('app_attendance_sheet', {'id': promotion.id}) }}" 
+                                           class="btn btn-sm btn-outline-primary shadow-sm px-3">
+                                            <i class="bi bi-calendar-check me-1"></i> Faire l'appel
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info border-0 shadow-sm p-4 text-center" role="alert">
+                <i class="bi bi-info-circle fs-3 d-block mb-2 text-info"></i>
+                <p class="mb-0">Vous n'avez aucune promotion enregistrée pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</turbo-frame>
+{% endblock %}

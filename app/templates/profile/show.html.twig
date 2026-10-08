@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Mon profil</h2>
+        <a href="{{ path('app_profile_edit') }}" class="btn btn-warning btn-sm">
+            <i class="bi bi-pencil"></i> Modifier
+        </a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="dashboard-flash dashboard-flash-success mb-3">{{ message }}</div>
+    {% endfor %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set role_label = 'Administrateur' %}
+    {% elseif is_granted('ROLE_VISITOR') %}
+        {% set role_label = 'Visiteur' %}
+    {% elseif is_granted('ROLE_TEACHER') %}
+        {% set role_label = 'Professeur' %}
+    {% else %}
+        {% set role_label = 'Etudiant' %}
+    {% endif %}
+
+    <div class="dashboard-stack">
+        <section class="dashboard-hero">
+            <div class="dashboard-hero-top">
+                <span class="dashboard-kicker">Espace personnel</span>
+                <h3>{{ user.firstname }} {{ user.lastname }}</h3>
+                <p class="dashboard-note">{{ user.email }}</p>
+                <div class="dashboard-pill-row">
+                    <span class="pill">{{ role_label }}</span>
+                    {% if user.phoneNumber %}
+                        <span class="pill">{{ user.phoneNumber }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <div class="detail-table-wrapper">
+            <table class="table detail-table">
+                <tbody>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Prenom</th>
+                        <td>{{ user.firstname }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <td>{{ user.lastname }}</td>
+                    </tr>
+                    <tr>
+                        <th>Role</th>
+                        <td>{{ role_label }}</td>
+                    </tr>
+                    <tr>
+                        <th>Telephone</th>
+                        <td>{{ user.phoneNumber ? user.phoneNumber : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>GitHub</th>
+                        <td>
+                            {% if user.github %}
+                                <a href="{{ user.github }}" target="_blank" rel="noopener noreferrer">{{ user.github }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Google Drive</th>
+                        <td>
+                            {% if user.googleDrive %}
+                                <a href="{{ user.googleDrive }}" target="_blank" rel="noopener noreferrer">{{ user.googleDrive }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</turbo-frame>
+{% endblock %}

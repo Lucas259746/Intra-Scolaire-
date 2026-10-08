@@ -1,0 +1,576 @@
+/* =========================================================
+   GOOGLE FONTS
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Gloock&family=Poppins:ital,wght@0,200;0,300;0,400;0,500;1,200;1,300&display=swap');
+
+/* =========================================================
+   ROOT VARIABLES
+   MOBILE FIRST
+========================================================= */
+
+:root {
+  /* ================= COLORS ================= */
+
+  --color-primary: #232448;
+  --color-secondary: #D6561A;
+  --color-tertiary: #F9DFBF;
+
+  --color-background: #f6f3ef;
+  --color-surface: #ffffff;
+  --color-surface-dark: #2c2d57;
+
+  --color-text: #232448;
+  --color-text-light: #ffffff;
+  --color-text-soft: #777792;
+
+  --color-border: rgba(35, 36, 72, 0.12);
+
+  /* ================= BUTTONS ================= */
+
+  --btn-primary: #232448;
+  --btn-secondary: #D6561A;
+  --btn-soft: #E79873;
+
+  /* ================= TYPO ================= */
+
+  --font-title: "Gloock", serif;
+  --font-main: "Poppins", sans-serif;
+
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+
+  /* ================= RADIUS ================= */
+
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-xl: 42px;
+  --radius-full: 999px;
+
+  /* ================= SPACING ================= */
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ================= SHADOWS ================= */
+
+  --shadow-sm: 0 2px 10px rgba(35, 36, 72, 0.08);
+  --shadow-md: 0 8px 24px rgba(35, 36, 72, 0.12);
+  --shadow-lg: 0 14px 40px rgba(35, 36, 72, 0.16);
+
+  /* ================= TRANSITIONS ================= */
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+
+  /* ================= CONTAINER ================= */
+
+  --container-width: 1400px;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+
+  background: var(--color-background);
+
+  color: var(--color-text);
+
+  font-family: var(--font-main);
+  font-weight: var(--font-light);
+
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #4E50B3 #ece7e2;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA
+========================================================= */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.title {
+  font-family: var(--font-title);
+  color: var(--color-primary);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 5vw, 5rem);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+p,
+span,
+button,
+input,
+textarea {
+  font-family: var(--font-main);
+}
+
+.text-extralight-italic {
+  font-weight: var(--font-extralight);
+  font-style: italic;
+}
+
+.text-light {
+  font-weight: var(--font-light);
+}
+
+.text-regular {
+  font-weight: var(--font-regular);
+}
+
+.text-medium {
+  font-weight: var(--font-medium);
+}
+
+.subtitle {
+  color: var(--color-text-soft);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+
+  margin-inline: auto;
+
+  padding-inline: 1rem;
+}
+
+.section {
+  padding-block: clamp(2rem, 5vw, 6rem);
+}
+
+/* =========================================================
+   GRID SYSTEM
+========================================================= */
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr;
+}
+
+.grid-3 {
+  grid-template-columns: 1fr;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+  background: var(--color-surface);
+
+  border-radius: var(--radius-lg);
+
+  padding: clamp(1rem, 3vw, 2rem);
+
+  box-shadow: var(--shadow-md);
+}
+
+.card-dark {
+  background: var(--color-primary);
+
+  color: white;
+
+  border-radius: var(--radius-lg);
+
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn {
+  border: none;
+  outline: none;
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+
+  transition: var(--transition-normal);
+
+  font-family: var(--font-main);
+  font-weight: var(--font-medium);
+
+  width: fit-content;
+
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--btn-primary);
+  color: white;
+
+  padding: 0.9rem 1.3rem;
+
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary);
+  color: white;
+
+  padding: 0.9rem 1.3rem;
+
+  border-radius: var(--radius-md);
+}
+
+.btn-soft {
+  background: var(--btn-soft);
+  color: white;
+
+  padding: 0.9rem 1.3rem;
+
+  border-radius: var(--radius-full);
+}
+
+/* =========================================================
+   PILLS
+========================================================= */
+
+.pill {
+  width: fit-content;
+
+  padding: 0.65rem 1rem;
+
+  border-radius: var(--radius-full);
+
+  background: var(--color-tertiary);
+
+  color: var(--color-primary);
+
+  font-size: 0.85rem;
+  font-weight: var(--font-regular);
+}
+
+.pill-soft {
+  background: var(--btn-soft);
+  color: white;
+}
+
+/* =========================================================
+   ICON BOX
+========================================================= */
+
+.icon-box {
+  width: clamp(46px, 5vw, 58px);
+  aspect-ratio: 1;
+
+  border-radius: var(--radius-md);
+
+  background: white;
+
+  border: 1px solid var(--color-border);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: var(--transition-normal);
+
+  box-shadow: var(--shadow-sm);
+
+  flex-shrink: 0;
+}
+
+.icon-box:hover {
+  background: var(--color-tertiary);
+
+  transform: translateY(-2px);
+
+  box-shadow: var(--shadow-md);
+}
+
+.icon-box svg {
+  width: 45%;
+  height: 45%;
+
+  fill: var(--color-primary);
+}
+
+.icon-box.active {
+  background: var(--color-primary);
+}
+
+.icon-box.active svg {
+  fill: white;
+}
+
+/* =========================================================
+   AUTH / LOGIN
+========================================================= */
+
+.auth-page {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.auth-card {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-header {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.auth-pill {
+  margin-inline: auto;
+}
+
+.auth-title {
+  font-size: clamp(2rem, 4vw, 2.6rem);
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.auth-alert {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(214, 86, 26, 0.25);
+  background: #fff4ef;
+  color: var(--color-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-submit {
+  width: 100%;
+}
+
+/* =========================================================
+   FLEX UTILITIES
+========================================================= */
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.gap-sm {
+  gap: 0.5rem;
+}
+
+.gap-md {
+  gap: 1rem;
+}
+
+.gap-lg {
+  gap: 2rem;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media screen and (min-width: 768px) {
+  .container {
+    padding-inline: 2rem;
+  }
+
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media screen and (min-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sidebar {
+    width: 280px;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    transition: var(--transition-normal);
+  }
+}
+
+/* =========================================================
+   LARGE SCREENS
+========================================================= */
+
+@media screen and (min-width: 1600px) {
+  html {
+    font-size: 110%;
+  }
+
+  .container {
+    max-width: 1600px;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media screen and (max-width: 360px) {
+  .sidebar-item {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .pill {
+    font-size: 0.75rem;
+  }
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ece7e2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4E50B3;
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: #232448;
+}
+
+.auth-link {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: var(--font-medium);
+  transition: var(--transition-fast);
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-field ul {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+
+.auth-field ul li {
+  color: #e53e3e;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}

@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/index.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="auth-page center">
+    <form method="post" class="auth-card card">
+        <div class="auth-header text-center">
+            <span class="pill auth-pill">Connexion</span>
+            <h1 class="title auth-title">Bienvenue</h1>
+            <p class="subtitle">Connecte-toi a ton espace Intra-Scolaire.</p>
+        </div>
+
+        {% if error %}
+            <div class="auth-alert">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        {% if app.user %}
+            <div class="subtitle text-center">
+                Tu es connecte en tant que {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}" class="auth-link">se deconnecter</a>
+            </div>
+        {% endif %}
+
+        <div class="auth-field">
+            <label for="inputEmail">Email</label>
+            <input
+                type="email"
+                value="{{ last_username }}"
+                name="email"
+                id="inputEmail"
+                class="input"
+                autocomplete="email"
+                required
+                autofocus
+            >
+        </div>
+
+        <div class="auth-field">
+            <label for="inputPassword">Mot de passe</label>
+            <input
+                type="password"
+                name="password"
+                id="inputPassword"
+                class="input"
+                autocomplete="current-password"
+                required
+            >
+        </div>
+
+        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+        <label class="auth-remember subtitle">
+            <input type="checkbox" name="_remember_me">
+            Se souvenir de moi
+        </label>
+
+        <button class="btn btn-primary auth-submit" type="submit">
+             Se connecter
+        </button>
+
+        <div class="subtitle text-center">
+            Pas encore de compte ?
+            <a href="{{ path('app_register') }}" class="auth-link">S'inscrire</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

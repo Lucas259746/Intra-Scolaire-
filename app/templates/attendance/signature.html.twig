@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Signature de présence{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Feuille de présence</h2>
+        <a href="{{ path('app_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {% if errorMessage is defined %}
+        <div class="alert alert-warning">{{ errorMessage }}</div>
+    {% endif %}
+
+    {% if infoMessage is defined %}
+        <div class="alert alert-info">{{ infoMessage }}</div>
+    {% endif %}
+
+    {% if form is defined and form is not empty %}
+        {{ form_start(form, {'action': path('app_attendance_sign'), 'attr': {'novalidate': 'novalidate', 'class': 'dashboard-form', 'data-turbo': 'false'}}) }}
+            <div class="dashboard-form-shell dashboard-form-shell-compact">
+                <div class="dashboard-form-intro">
+                    <span class="pill">Signature</span>
+                    <p class="dashboard-note">Choisissez votre présence ou votre absence, puis envoyez votre demande au professeur.</p>
+                </div>
+
+                {% if form_errors(form) %}
+                    <div class="dashboard-flash dashboard-flash-danger mb-3">
+                        {{ form_errors(form) }}
+                    </div>
+                {% endif %}
+
+                <div class="dashboard-form-fields">
+                    {# 1. Sélection du statut #}
+                    <div class="mb-3">
+                        {{ form_label(form.status) }}
+                        <div class="dashboard-form-status">
+                            {% for choice in form.status %}
+                                <div class="form-check">
+                                    {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            {% endfor %}
+                            {{ form_errors(form.status) }}
+                        </div>
+                    </div>
+                    
+                    {# 2. Sélection du justificatif (Ajout d'un ID de groupe pour le cibler en JS) #}
+                    <div class="mb-3" id="document-group">
+                        {{ form_label(form.document) }}
+                        {{ form_widget(form.document, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.document) }}
+                    </div>
+
+                    {# 3. Commentaire #}
+                    <div class="mb-3">
+                        {{ form_label(form.comment) }}
+                        {{ form_widget(form.comment, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                        {{ form_errors(form.comment) }}
+                    </div>
+                </div>
+
+                <div class="dashboard-form-actions mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-pen"></i> Envoyer ma demande
+                    </button>
+                    <a href="{{ path('app_dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
+            </div>
+        {{ form_end(form) }}
+
+        {# BLOC JAVASCRIPT #}
+        <script>
+            (function() {
+                function initDocumentToggle() {
+                    // Sélection des boutons radio du statut et du conteneur du justificatif
+                    const statusRadios = document.querySelectorAll('input[name="{{ form.status.vars.full_name }}"]');
+                    const documentGroup = document.getElementById('document-group');
+                    
+                    if (!documentGroup || statusRadios.length === 0) return;
+
+                    function toggleDocumentField() {
+                        let selectedValue = '';
+                        statusRadios.forEach(radio => {
+                            if (radio.checked) {
+                                selectedValue = radio.value;
+                            }
+                        });
+
+                        // Les valeurs attendues proviennent de ton AttendanceType Enum (ex: 'pending_late', 'pending_absent')
+                        // On vérifie si la valeur contient 'late' ou 'absent'
+                        if (selectedValue.includes('absent') || selectedValue.includes('late')) {
+                            documentGroup.style.display = 'block';
+                        } else {
+                            documentGroup.style.display = 'none';
+                            // Optionnel : Réinitialise le select si masqué
+                            const select = documentGroup.querySelector('select');
+                            if (select) select.value = '';
+                        }
+                    }
+
+                    // Écoute des changements sur chaque bouton radio
+                    statusRadios.forEach(radio => {
+                        radio.addEventListener('change', toggleDocumentField);
+                    });
+
+                    // Exécution immédiate pour appliquer l'état au chargement (ex: en cas d'erreur de formulaire)
+                    toggleDocumentField();
+                }
+
+                // Initialisation compatible avec le chargement classique et les requêtes Turbo Frame / Turbo Drive
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initDocumentToggle);
+                } else {
+                    initDocumentToggle();
+                }
+                document.addEventListener('turbo:load', initDocumentToggle);
+            })();
+        </script>
+    {% endif %}
+</turbo-frame>
+{% endblock %}

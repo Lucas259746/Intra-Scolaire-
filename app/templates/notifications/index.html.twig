@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Notifications</h2>
+        {% if is_granted('ROLE_TEACHER') %}
+            <a href="{{ path('app_notifications_new') }}" class="btn btn-primary btn-sm" data-turbo-frame="main-frame">
+                <i class="bi bi-plus-lg"></i> Nouvelle
+            </a>
+        {% endif %}
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="dashboard-flash dashboard-flash-success mb-3">{{ message }}</div>
+    {% endfor %}
+
+    <div class="notif-list">
+        {% for recipient in recipients %}
+            {% set notif = recipient.notificationId %}
+            {% set sender = notif.sender %}
+            {% set initial = sender ? (sender.firstname|first ~ sender.lastname|first)|upper : 'IS' %}
+            {% set senderName = sender ? (sender.firstname ~ ' ' ~ sender.lastname) : 'Intra Scolaire' %}
+            {% set type = notif.type.value %}
+
+            <div class="notif-item {{ recipient.isRead ? 'notif-read' : 'notif-unread' }}" data-notif-id="{{ recipient.id }}">
+                <button class="notif-row" type="button" aria-expanded="false">
+                    <div class="notif-avatar notif-avatar--{{ type }}">{{ initial }}</div>
+                    <div class="notif-meta">
+                        <span class="notif-sender">{{ senderName }}</span>
+                        <span class="notif-title">{{ notif.title }}</span>
+                    </div>
+                    <div class="notif-aside">
+                        {% if not recipient.isRead %}
+                            <span class="notif-dot"></span>
+                        {% endif %}
+                        <span class="notif-badge notif-badge--{{ type }}">
+                            {% if type == 'alert' %}Alerte
+                            {% elseif type == 'warning' %}Avertissement
+                            {% elseif type == 'error' %}Erreur
+                            {% elseif type == 'success' %}Succès
+                            {% else %}{{ type }}{% endif %}
+                        </span>
+                        {% if notif.createdAt %}
+                            <span class="notif-date">{{ notif.createdAt|date('d/m/Y') }}</span>
+                        {% endif %}
+                        <i class="bi bi-chevron-down notif-chevron"></i>
+                    </div>
+                </button>
+
+                <div class="notif-body">
+                    <p class="notif-message">{{ notif.message }}</p>
+                    {% if not recipient.isRead %}
+                        <form method="post"
+                              action="{{ path('app_notifications_read', {'id': recipient.id}) }}"
+                              class="notif-read-form">
+                            <input type="hidden" name="_token" value="{{ csrf_token('read' ~ recipient.id) }}">
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="dashboard-empty">Aucune notification.</div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ knp_pagination_render(recipients) }}
+    </div>
+
+<script>
+(function () {
+    document.querySelectorAll('.notif-item').forEach(function (item) {
+        const btn  = item.querySelector('.notif-row');
+        const body = item.querySelector('.notif-body');
+        const form = item.querySelector('.notif-read-form');
+
+        btn.addEventListener('click', function () {
+            const open = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', String(!open));
+            body.classList.toggle('notif-body--open', !open);
+            item.querySelector('.notif-chevron').classList.toggle('notif-chevron--open', !open);
+
+            if (!open && form) {
+                form.requestSubmit();
+                item.classList.remove('notif-unread');
+                item.classList.add('notif-read');
+                item.querySelector('.notif-dot')?.remove();
+            }
+        });
+    });
+})();
+</script>
+</turbo-frame>
+{% endblock %}

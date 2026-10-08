@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detail document{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Detail du document</h2>
+        <a href="{{ path('app_documents_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 text-primary">{{ document.title }}</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <tbody>
+                    <tr><th class="ps-4 bg-light" style="width:30%">ID</th><td class="ps-4">#{{ document.id }}</td></tr>
+                    <tr>
+                        <th class="ps-4 bg-light">Type</th>
+                        <td class="ps-4">
+                            {% set typeValue = document.type.value|lower %}
+                            {% set color = typeValue == 'pdf' ? '#e74c3c' : (typeValue == 'video' ? '#3498db' : '#6c757d') %}
+                            <span class="badge" style="background-color: {{ color }}; padding: 5px 10px;">{{ typeValue|upper }}</span>
+                        </td>
+                    </tr>
+                    <tr><th class="ps-4 bg-light">Titre</th><td class="ps-4 fw-bold">{{ document.title }}</td></tr>
+                    <tr><th class="ps-4 bg-light">Fichier</th><td class="ps-4"><code class="text-muted">{{ document.path }}</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white py-3 d-flex justify-content-between">
+            <div>
+                {% if document.path %}
+                    <a href="{{ asset('uploads/documents/' ~ document.path) }}"
+                       class="btn btn-outline-primary btn-sm"
+                       download="{{ document.title }}">
+                        <i class="bi bi-download"></i> Télécharger
+                    </a>
+                {% endif %}
+                {% if is_granted('ROLE_TEACHER')or is_granted('ROLE_STUDENT') %}
+                    <a href="{{ path('app_documents_edit', {'id': document.id}) }}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                {% endif %}
+            </div>
+            {% if is_granted('ROLE_TEACHER') or is_granted('ROLE_STUDENT')%}
+                <div>{{ include('documents/_delete_form.html.twig') }}</div>
+            {% endif %}
+        </div>
+    </div>
+</turbo-frame>
+{% endblock %}

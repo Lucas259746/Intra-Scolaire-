@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Documents{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Documents</h2>
+        {% if is_granted('ROLE_TEACHER') or is_granted('ROLE_STUDENT') %}
+            <a href="{{ path('app_documents_new') }}" class="btn btn-primary btn-sm" data-turbo-frame="main-frame">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </a>
+        {% endif %}
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="dashboard-flash dashboard-flash-success mb-3">{{ message }}</div>
+    {% endfor %}
+
+    {% if documents is empty %}
+        <div class="dashboard-empty">Aucun document enregistré.</div>
+    {% else %}
+        <div class="gdrive-grid">
+            {% for document in documents %}
+                {% set type_value = document.type ? document.type.value|lower : 'autre' %}
+                <div class="gdrive-card"
+                     data-path="{{ document.path ? asset('uploads/documents/' ~ document.path) : '' }}"
+                     data-title="{{ document.title }}">
+                    <div class="gdrive-thumb">
+                        <i class="bi bi-file-earmark-pdf-fill gdrive-thumb-icon gdrive-thumb-icon--{{ type_value }}"></i>
+                    </div>
+                    <div class="gdrive-footer">
+                        <span class="gdrive-name" title="{{ document.title }}">{{ document.title }}</span>
+                        <span class="gdrive-owner">
+                            <i class="bi bi-person"></i>
+                            {{ document.user ? (document.user.firstname ~ ' ' ~ document.user.lastname) : '—' }}
+                        </span>
+                    </div>
+                    <div class="gdrive-hover-actions">
+                        {% if document.path %}
+                            <button class="gdrive-btn-open" type="button" title="Ouvrir">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <a href="{{ asset('uploads/documents/' ~ document.path) }}"
+                               download="{{ document.title }}"
+                               class="gdrive-btn-dl"
+                               title="Télécharger">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('ROLE_TEACHER') or is_granted('ROLE_STUDENT') %}
+                            <a href="{{ path('app_documents_edit', {'id': document.id}) }}"
+                               class="gdrive-btn-edit"
+                               data-turbo-frame="main-frame"
+                               title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(documents) }}
+    </div>
+
+    <div class="gdrive-modal" id="gdrive-modal">
+    <div class="gdrive-modal-backdrop" id="gdrive-backdrop"></div>
+    <div class="gdrive-modal-panel">
+        <div class="gdrive-modal-header">
+            <span class="gdrive-modal-title" id="gdrive-modal-title"></span>
+            <div class="gdrive-modal-header-actions">
+                <a class="gdrive-modal-dl" id="gdrive-modal-dl" download title="Télécharger">
+                    <i class="bi bi-download"></i> Télécharger
+                </a>
+                <button class="gdrive-modal-close" id="gdrive-modal-close" title="Fermer" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <iframe class="gdrive-modal-iframe" id="gdrive-modal-iframe" src="" title="Aperçu PDF"></iframe>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal    = document.getElementById('gdrive-modal');
+    const backdrop = document.getElementById('gdrive-backdrop');
+    const iframe   = document.getElementById('gdrive-modal-iframe');
+    const title    = document.getElementById('gdrive-modal-title');
+    const dlBtn    = document.getElementById('gdrive-modal-dl');
+    const closeBtn = document.getElementById('gdrive-modal-close');
+
+    function openModal(path, docTitle) {
+        iframe.src = path;
+        title.textContent = docTitle;
+        dlBtn.href = path;
+        dlBtn.download = docTitle;
+        modal.classList.add('gdrive-modal--open');
+    }
+
+    function closeModal() {
+        modal.classList.remove('gdrive-modal--open');
+        iframe.src = '';
+    }
+
+    document.querySelectorAll('.gdrive-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            if (e.target.closest('a, button')) return;
+            const path = card.dataset.path;
+            if (!path) return;
+            openModal(path, card.dataset.title);
+        });
+    });
+
+    document.querySelectorAll('.gdrive-btn-open').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const card = btn.closest('.gdrive-card');
+            openModal(card.dataset.path, card.dataset.title);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
+})();
+</script>
+</turbo-frame>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Promotions index{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Promotions</h2>
+        {% if is_granted('ROLE_TEACHER') %}
+            <a href="{{ path('app_promotions_new') }}" class="btn btn-success btn-sm">+ Nouvelle promotion</a>
+        {% endif %}
+    </div>
+
+    <div class="responsive-table-wrapper">
+        <table class="table table-hover responsive-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Professeur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for promotion in promotions %}
+                <tr>
+                    <td data-label="ID">{{ promotion.id }}</td>
+                    <td data-label="Nom">{{ promotion.name }}</td>
+                    <td data-label="Professeur">{{ promotion.professor.firstname }} {{ promotion.professor.lastname }}</td>
+                    <td data-label="Actions">
+                        <div class="table-actions">
+                            <a href="{{ path('app_promotions_show', {'id': promotion.id}) }}" class="btn btn-outline-info btn-sm">Voir</a>
+                            {% if is_granted('ROLE_TEACHER') %}
+                                <a href="{{ path('app_promotions_edit', {'id': promotion.id}) }}" class="btn btn-outline-warning btn-sm">Modifier</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr class="table-empty-row">
+                    <td colspan="4" class="table-empty-state">Aucune promotion enregistree.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-center mt-3">
+        {{ knp_pagination_render(promotions) }}
+    </div>
+</turbo-frame>
+{% endblock %}

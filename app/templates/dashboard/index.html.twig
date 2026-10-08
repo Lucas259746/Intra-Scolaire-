@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - {{ user.firstname }} {{ user.lastname }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <span class="app-name">Intra Scolaire</span>
+            <span class="user-name">{{ user.firstname }} {{ user.lastname }}</span>
+            <span class="user-role">
+                {% if is_granted('ROLE_ADMIN') %}Administrateur
+                {% elseif is_granted('ROLE_TEACHER') %}Professeur
+                {% elseif is_granted('ROLE_VISITOR') %}Visiteur
+                {% else %}Etudiant{% endif %}
+            </span>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="nav-section">Navigation</li>
+
+            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_VISITOR') %}
+            <li>
+                <a href="{{ path('app_promotions_index') }}"
+                   class="sidebar-link"
+                   aria-label="Promotions"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-mortarboard"></i>
+                    <span class="sidebar-label">Promotions</span>
+                </a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="{{ path('app_absences_index') }}"
+                   class="sidebar-link"
+                   aria-label="Absences"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-calendar-x"></i>
+                    <span class="sidebar-label">Absences</span>
+                </a>
+            </li>
+            {% if not is_granted('ROLE_VISITOR') %}
+            <li>
+                <a href="{{ path('app_grades_index') }}"
+                   class="sidebar-link"
+                   aria-label="Notes"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-clipboard-check"></i>
+                    {{ is_granted('ROLE_TEACHER') ? 'À noter' : 'Notes' }}
+                </a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="{{ path('app_documents_index') }}"
+                   class="sidebar-link"
+                   aria-label="Documents"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="sidebar-label">Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_projects_index') }}"
+                   class="sidebar-link"
+                   aria-label="Projets"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-kanban"></i>
+                    <span class="sidebar-label">Projets</span>
+                </a>
+            </li>
+
+            {% if not is_granted('ROLE_ADMIN') and not is_granted('ROLE_TEACHER') and not is_granted('ROLE_VISITOR') %}
+            <li>
+                <a href="{{ path('app_attendance_sign') }}"
+                   class="sidebar-link"
+                   aria-label="Signer ma présence"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-pen"></i>
+                    <span class="sidebar-label">Signer ma présence</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if not is_granted('ROLE_VISITOR') %}
+            <li>
+                <a href="{{ path('app_notifications_index') }}"
+                   class="sidebar-link"
+                   aria-label="Notifications"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-bell"></i>
+                    <span class="sidebar-label">Notifications</span>
+                    {% set unreadCount = unread_notifications_count() %}
+                    {% if unreadCount > 0 %}
+                        <span class="badge sidebar-badge">{{ unreadCount }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+            {% if is_granted('ROLE_TEACHER') or is_granted('ROLE_VISITOR')  %}
+            <li>
+                <a href="{{ path('app_admin_users') }}"
+                   class="sidebar-link"
+                   aria-label="Etudiants"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-people-fill"></i>
+                    <span class="sidebar-label">Etudiants</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if is_granted('ROLE_ADMIN') %}
+            <li class="nav-section">Administration</li>
+            <li>
+                <a href="{{ path('app_admin_members') }}"
+                   class="sidebar-link"
+                   aria-label="Membres"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-people"></i>
+                    <span class="sidebar-label">Membres</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if is_granted('ROLE_TEACHER') %}
+            <li>
+                <a href="{{ path('app_attendance') }}"
+                   class="sidebar-link"
+                   data-turbo-frame="main-frame">
+                    <i class="bi bi-people-fill"></i> Emargement
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="sidebar-footer">
+            <a href="{{ path('app_profile') }}"
+               aria-label="Mon profil"
+               data-turbo-frame="main-frame">
+                <i class="bi bi-person-circle"></i> 
+            </a>
+            <a href="{{ logout_path() }}">
+                <i class="bi bi-box-arrow-left"></i> 
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <turbo-frame id="main-frame" src="{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_VISITOR') %}{{ path('app_promotions_index') }}{% else %}{{ path('app_absences_index') }}{% endif %}">
+            <div class="loading-placeholder">Chargement...</div>
+        </turbo-frame>
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('.sidebar-link');
+
+        function setActive(link) {
+            links.forEach((item) => item.classList.remove('active'));
+            link.classList.add('active');
+        }
+
+        links.forEach((link) => {
+            link.addEventListener('click', function () {
+                setActive(this);
+            });
+        });
+
+        if (links.length > 0) {
+            links[0].classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

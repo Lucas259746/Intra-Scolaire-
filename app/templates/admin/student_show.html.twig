@@ -1,0 +1,196 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ student.firstname }} {{ student.lastname }}{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <section class="dashboard-hero mb-4">
+        <div class="dashboard-hero-top">
+            <span class="dashboard-kicker">Fiche etudiant</span>
+            <h2 class="mb-0">{{ student.firstname }} {{ student.lastname }}</h2>
+            <div class="dashboard-pill-row">
+                {% for pu in student.promotionUsers %}
+                    <span class="badge bg-secondary">{{ pu.promotion.name }}</span>
+                {% else %}
+                    <span class="pill">Sans promotion</span>
+                {% endfor %}
+            </div>
+            <div class="dashboard-meta">
+                <span><i class="bi bi-envelope"></i> <a href="mailto:{{ student.email }}">{{ student.email }}</a></span>
+                {% if student.phoneNumber %}
+                    <span><i class="bi bi-telephone"></i> {{ student.phoneNumber }}</span>
+                {% endif %}
+                {% if student.github %}
+                    <span><i class="bi bi-github"></i> <a href="{{ student.github }}" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+                {% endif %}
+                {% if student.googleDrive %}
+                    <span><i class="bi bi-folder2-open"></i> <a href="{{ student.googleDrive }}" target="_blank" rel="noopener noreferrer">Google Drive</a></span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="dashboard-hero-actions">
+            {% if is_granted('ROLE_ADMIN') %}
+            <form method="post"
+                  action="{{ path('app_admin_set_role', {'id': student.id}) }}"
+                  class="d-flex gap-1">
+                <input type="hidden" name="_token" value="{{ csrf_token('set_role_' ~ student.id) }}">
+                <select name="role" class="form-select form-select-sm" style="width: auto;">
+                    <option value="ROLE_STUDENT" {% if 'ROLE_STUDENT' in student.roles %}selected{% endif %}>Étudiant</option>
+                    <option value="ROLE_TEACHER" {% if 'ROLE_TEACHER' in student.roles %}selected{% endif %}>Professeur</option>
+                    <option value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in student.roles %}selected{% endif %}>Admin</option>
+                    <option value="ROLE_VISITOR" {% if 'ROLE_VISITOR' in student.roles %}selected{% endif %}>Visiteur</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary">✓</button>
+            </form>
+            <form method="post"
+                  action="{{ path('app_admin_set_promo', {'id': student.id}) }}"
+                  class="d-flex gap-1">
+                <input type="hidden" name="_token" value="{{ csrf_token('set_promo_' ~ student.id) }}">
+                <select name="promotion[]" multiple class="form-select form-select-sm" style="width: auto;">
+                    {% for promotion in promotions %}
+                        <option value="{{ promotion.id }}">{{ promotion.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary">✓</button>
+            </form>
+            {% endif %}
+            <a href="{{ path('app_admin_users') }}" class="btn btn-outline-secondary btn-sm" data-turbo-frame="main-frame">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </section>
+
+    <div class="dashboard-stat-grid mb-4">
+        <article class="dashboard-stat-card">
+            <span class="dashboard-kicker">Notes</span>
+            <strong>{{ student.grades|length }}</strong>
+            <p class="dashboard-note">Evaluations deja rattachees</p>
+        </article>
+        <article class="dashboard-stat-card">
+            <span class="dashboard-kicker">Documents</span>
+            <strong>{{ student.documents|length }}</strong>
+            <p class="dashboard-note">Fichiers disponibles</p>
+        </article>
+        <article class="dashboard-stat-card">
+            <span class="dashboard-kicker">Absences</span>
+            <strong>{{ student.absences|length }}</strong>
+            <p class="dashboard-note">Periodes declarees</p>
+        </article>
+    </div>
+
+    <div class="dashboard-stack">
+        <section class="dashboard-section-card">
+            <div class="dashboard-section-heading">
+                <h3>Notes</h3>
+                <span class="pill">{{ student.grades|length }} entree{{ student.grades|length > 1 ? 's' : '' }}</span>
+            </div>
+
+            {% if student.grades is empty %}
+                <div class="dashboard-empty">Aucune note enregistree.</div>
+            {% else %}
+                <div class="responsive-table-wrapper">
+                    <table class="table table-sm responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Projet</th>
+                                <th>Statut</th>
+                                <th>Note</th>
+                                <th>Commentaire</th>
+                                <th>Rendu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for grade in student.grades %}
+                            <tr>
+                                <td data-label="Projet">{{ grade.project.title }}</td>
+                                <td data-label="Statut">
+                                    {% if grade.status.value == 'note' %}
+                                        <span class="badge bg-success">Note</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Note">{{ grade.grade ?? '-' }}</td>
+                                <td data-label="Commentaire">{{ grade.comments ?? '-' }}</td>
+                                <td data-label="Rendu">
+                                    {% if grade.submission %}
+                                        <a href="{{ grade.submission }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-xs">Ouvrir</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+
+        <div class="dashboard-section-grid">
+            <section class="dashboard-section-card">
+                <div class="dashboard-section-heading">
+                    <h3>Documents</h3>
+                    <span class="pill">{{ student.documents|length }}</span>
+                </div>
+
+                <div class="dashboard-list">
+                    {% for doc in student.documents %}
+                        <div class="dashboard-list-item">
+                            <div class="dashboard-list-main">
+                                <span class="dashboard-kicker">Document #{{ doc.id }}</span>
+                                <span class="dashboard-list-title">{{ doc.title }}</span>
+                            </div>
+                            <div class="dashboard-list-actions">
+                                <span class="type-tag {{ doc.type.value|lower == 'pdf' ? 'type-pdf' : (doc.type.value|lower == 'video' ? 'type-video' : 'type-other') }}">
+                                    {{ doc.type.value }}
+                                </span>
+                                {% if doc.path %}
+                                    <a href="{{ asset('uploads/documents/' ~ doc.path) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm">Telecharger</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="dashboard-empty">Aucun document.</div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="dashboard-section-card">
+                <div class="dashboard-section-heading">
+                    <h3>Absences</h3>
+                    <span class="pill">{{ student.absences|length }}</span>
+                </div>
+
+                <div class="dashboard-list">
+                    {% for absence in student.absences %}
+                        <div class="dashboard-list-item">
+                            <div class="dashboard-list-main">
+                                <span class="dashboard-kicker">Periode</span>
+                                <span class="dashboard-list-title">{{ absence.startDate|date('d/m/Y') }}</span>
+                                <div class="dashboard-meta">
+                                    {% if absence.endDate and absence.endDate != absence.startDate %}
+                                        <span>jusqu au {{ absence.endDate|date('d/m/Y') }}</span>
+                                    {% else %}
+                                        <span>Une seule journee</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="dashboard-list-actions">
+                                {% if absence.document %}
+                                    <span class="badge bg-info">Justifiee</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Non justifiee</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="dashboard-empty">Aucune absence.</div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</turbo-frame>
+{% endblock %}

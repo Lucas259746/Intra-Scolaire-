@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detail absence{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Detail de l'absence</h2>
+        <a href="{{ path('app_absences_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <table class="table">
+        <tbody>
+            <tr><th>Étudiant</th><td>{{ absence.user.firstname }} {{ absence.user.lastname }}</td></tr>
+            <tr><th>Début</th><td>{{ absence.startDate ? absence.startDate|date('d/m/Y H:i') : '—' }}</td></tr>
+            <tr><th>Fin</th><td>{{ absence.endDate ? absence.endDate|date('d/m/Y H:i') : '—' }}</td></tr>
+            <tr>
+                <th>Justificatif</th>
+                   <td>
+                    {% if absence.document %}
+                       
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span class="badge bg-success">
+                                <i class="bi bi-file-earmark-check"></i> {{ absence.document.title }}
+                            </span>
+                            
+                            {% if absence.document.path %}
+                                {# On ajoute également une marge de sécurité à gauche du bouton #}
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary btn-js-open-pdf" 
+                                        style="margin-left: 10px;"
+                                        data-path="{{ asset('uploads/documents/' ~ absence.document.path) }}"
+                                        data-title="{{ absence.document.title }}"
+                                        title="Consulter le justificatif">
+                                    <i class="bi bi-eye"></i> Voir le PDF
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <span class="text-muted">Aucun justificatif</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if is_granted('ROLE_TEACHER') %}
+        <div class="detail-actions">
+            <a href="{{ path('app_absences_edit', {'id': absence.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+            {{ include('absences/_delete_form.html.twig') }}
+        </div>
+    {% endif %}
+
+    
+    <div class="gdrive-modal" id="gdrive-modal">
+        <div class="gdrive-modal-backdrop" id="gdrive-backdrop"></div>
+        <div class="gdrive-modal-panel">
+            <div class="gdrive-modal-header">
+                <span class="gdrive-modal-title" id="gdrive-modal-title"></span>
+                <div class="gdrive-modal-header-actions">
+                    <a class="gdrive-modal-dl" id="gdrive-modal-dl" download title="Télécharger">
+                        <i class="bi bi-download"></i> Télécharger
+                    </a>
+                    <button class="gdrive-modal-close" id="gdrive-modal-close" title="Fermer" type="button">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <iframe class="gdrive-modal-iframe" id="gdrive-modal-iframe" src="" title="Aperçu PDF"></iframe>
+        </div>
+    </div>
+
+    
+    <script>
+    (function () {
+        const modal    = document.getElementById('gdrive-modal');
+        const backdrop = document.getElementById('gdrive-backdrop');
+        const iframe   = document.getElementById('gdrive-modal-iframe');
+        const title    = document.getElementById('gdrive-modal-title');
+        const dlBtn    = document.getElementById('gdrive-modal-dl');
+        const closeBtn = document.getElementById('gdrive-modal-close');
+
+        if (!modal) return; // Sécurité si hors du cadre Turbo
+
+        function openModal(path, docTitle) {
+            iframe.src = path;
+            title.textContent = docTitle;
+            dlBtn.href = path;
+            dlBtn.download = docTitle;
+            modal.classList.add('gdrive-modal--open');
+        }
+
+        function closeModal() {
+            modal.classList.remove('gdrive-modal--open');
+            iframe.src = '';
+        }
+
+        // Écouteur sur le bouton de consultation du PDF
+        document.querySelectorAll('.btn-js-open-pdf').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const path = btn.dataset.path;
+                const docTitle = btn.dataset.title;
+                if (path) {
+                    openModal(path, docTitle);
+                }
+            });
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    })();
+    </script>
+</turbo-frame>
+{% endblock %}

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Twig;
+
+use App\Repository\NotificationRecipientsRepository;
+use Symfony\Bundle\SecurityBundle\Security;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
+
+class NotificationExtension extends AbstractExtension
+{
+    public function __construct(
+        private NotificationRecipientsRepository $repo,
+        private Security $security,
+    ) {}
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('unread_notifications_count', $this->getUnreadCount(...)),
+        ];
+    }
+
+    public function getUnreadCount(): int
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            return 0;
+        }
+
+        return $this->repo->countUnreadByUser($user);
+    }
+}

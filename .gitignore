@@ -1,13 +1,19 @@
-
+# Symfony
 app/vendor/
 app/var/
 app/.env.local
 app/.env.*.local
 app/public/bundles/
+app/public/uploads/
 
-
-app/composer.lock
-
-
+# Docker
 .docker/
 
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

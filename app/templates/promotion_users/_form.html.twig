@@ -1,0 +1,22 @@
+{{ form_start(form, {'action': app.request.requestUri, 'attr': {'class': 'dashboard-form'}}) }}
+    <div class="dashboard-form-shell">
+        <div class="dashboard-form-intro">
+            <span class="pill">Membre</span>
+            <p class="dashboard-note">Affecte rapidement un etudiant a la bonne promotion.</p>
+        </div>
+
+        {% if form_errors(form) %}
+            <div class="dashboard-flash dashboard-flash-danger">
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
+
+        <div class="dashboard-form-fields">
+            {{ form_widget(form) }}
+        </div>
+
+        <div class="dashboard-form-actions">
+            <button class="btn btn-primary">{{ button_label|default('Enregistrer l affectation') }}</button>
+        </div>
+    </div>
+{{ form_end(form) }}

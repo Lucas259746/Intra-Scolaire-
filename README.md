@@ -1,7 +1,27 @@
-- Demarrer Docker
-- Lancer la commande "docker-compose up" à la racine du dossier
-- Dans un autre terminal, lancer "docker exec -it symfony_app bash", puis lancer les commandes suivantes dans ce terminal:
-  - chown -R www-data:www-data /var/www/html
-  - chmod -R 775 /var/www/html/var
-  - composer install
-  - exit
+# Intra-Scolaire
+
+## Démarrage avec Docker
+
+Prérequis : Docker Desktop démarré.
+
+Depuis la racine du dépôt, lancez :
+
+```powershell
+docker compose up --build
+```
+
+Composer est inclus dans l’image PHP. Les dépendances sont installées
+automatiquement au démarrage du conteneur `app`. L’application est ensuite
+accessible à l’adresse http://localhost:8080.
+
+Pour initialiser la base PostgreSQL après le premier démarrage :
+
+```powershell
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+Pour arrêter les conteneurs, utilisez `Ctrl+C`, puis :
+
+```powershell
+docker compose down
+```

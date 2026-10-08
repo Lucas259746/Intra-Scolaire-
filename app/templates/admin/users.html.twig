@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Etudiants{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Etudiants</h2>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="dashboard-flash dashboard-flash-success mb-3">{{ message }}</div>
+    {% endfor %}
+
+    <form method="get" action="{{ path('app_admin_users') }}" id="search-form" class="dashboard-filter-form mb-3">
+        <div class="dashboard-filter-grid">
+            <div>
+                <label for="search-input">Recherche</label>
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Rechercher un etudiant..."
+                    class="form-control"
+                    autocomplete="off"
+                    id="search-input"
+                >
+            </div>
+            <div>
+                <label for="promo-select">Promotion</label>
+                <select name="promotion" class="form-select" id="promo-select">
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <option value="">Toutes les promotions</option>
+                    <option value="none" {% if withoutPromo ?? false %}selected{% endif %}>Sans promotion</option>
+                    {% endif %}
+                    {% for promo in promotions %}
+                        <option value="{{ promo.id }}" {% if selectedPromotion == promo.id %}selected{% endif %}>
+                            {{ promo.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div class="dashboard-list">
+        {% for student in students %}
+            <a href="{{ path('app_students_show', {'id': student.id}) }}"
+               class="dashboard-list-item dashboard-list-link"
+               data-turbo-frame="main-frame">
+                <div class="dashboard-list-main">
+                    <span class="dashboard-kicker">Etudiant #{{ student.id }}</span>
+                    <span class="dashboard-list-title">{{ student.lastname }} {{ student.firstname }}</span>
+                    <div class="dashboard-meta">
+                        <span><i class="bi bi-envelope"></i> {{ student.email }}</span>
+                        {% if student.phoneNumber %}
+                            <span><i class="bi bi-telephone"></i> {{ student.phoneNumber }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="dashboard-list-actions">
+                    {% for pu in student.promotionUsers %}
+                        <span class="badge bg-secondary">{{ pu.promotion.name }}</span>
+                    {% else %}
+                        <span class="pill">Sans promotion</span>
+                    {% endfor %}
+                </div>
+            </a>
+        {% else %}
+            <div class="dashboard-empty">Aucun etudiant trouve.</div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ knp_pagination_render(students) }}
+    </div>
+
+<script>
+(function () {
+    const input = document.getElementById('search-input');
+    const select = document.getElementById('promo-select');
+    const frame = document.querySelector('turbo-frame#main-frame');
+    const base = '{{ path('app_admin_users') }}';
+    let timer;
+
+    if (frame.getAttribute('data-refocus') === 'search') {
+        frame.removeAttribute('data-refocus');
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+
+    function autoSubmit() {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const url = new URL(base, window.location.origin);
+            url.searchParams.set('search', input.value);
+            url.searchParams.set('promotion', select.value);
+            frame.setAttribute('data-refocus', 'search');
+            frame.src = url.toString();
+        }, 300);
+    }
+
+    input.addEventListener('input', autoSubmit);
+    select.addEventListener('change', autoSubmit);
+})();
+</script>
+</turbo-frame>
+{% endblock %}

@@ -17,12 +17,16 @@ return [
         'entrypoint' => true,
     ],
     '@hotwired/stimulus' => [
-        'version' => '3.2.2',
+        'path' => './assets/vendor/@hotwired/stimulus/stimulus.index.js',
     ],
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
     '@hotwired/turbo' => [
-        'version' => '7.3.0',
+        'path' => './assets/vendor/@hotwired/turbo/turbo.index.js',
+    ],
+    'bootstrap-icons/font/bootstrap-icons.css' => [
+        'path' => './assets/vendor/bootstrap-icons/font/bootstrap-icons.css',
+        'type' => 'css',
     ],
 ];

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Projets{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Projets</h2>
+        {% if is_granted('ROLE_TEACHER') %}
+            <a href="{{ path('app_projects_new') }}" class="btn btn-success btn-sm">+ Nouveau projet</a>
+        {% endif %}
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Date limite</th>
+                {% if is_granted('ROLE_TEACHER') %}
+                    <th>Statut</th>
+                {% endif %}
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for project in projects %}
+            <tr>
+                <td class="fw-semibold">{{ project.title }}</td>
+                <td>{{ project.dueDate ? project.dueDate|date('d/m/Y') : '—' }}</td>
+                {% if is_granted('ROLE_TEACHER') %}
+                <td>
+                    {% if project.visibility %}
+                        <span class="badge bg-success"><i class="bi bi-unlock"></i> Débloqué</span>
+                    {% else %}
+                        <span class="badge bg-secondary"><i class="bi bi-lock"></i> Verrouillé</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+                <td class="d-flex gap-1 flex-wrap">
+                    <a href="{{ path('app_projects_show', {'id': project.id}) }}" class="btn btn-outline-info btn-sm">Voir</a>
+                    {% if is_granted('ROLE_TEACHER') %}
+                        <a href="{{ path('app_projects_edit', {'id': project.id}) }}" class="btn btn-outline-warning btn-sm">Modifier</a>
+                        <form method="post" action="{{ path('app_projects_toggle', {'id': project.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ project.id) }}">
+                            <button class="btn btn-sm {{ project.visibility ? 'btn-outline-secondary' : 'btn-outline-success' }}">
+                                <i class="bi bi-{{ project.visibility ? 'lock' : 'unlock' }}"></i>
+                                {{ project.visibility ? 'Verrouiller' : 'Débloquer' }}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">Aucun projet enregistré.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-center mt-3">
+        {{ knp_pagination_render(projects) }}
+    </div>
+</turbo-frame>
+{% endblock %}

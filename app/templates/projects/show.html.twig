@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ project.title }}</h2>
+        <a href="{{ path('app_projects_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {# ── Infos projet ── #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <p class="mb-1 text-muted small">Description</p>
+                    <p class="mb-0">{{ project.description }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-1 text-muted small">Date limite</p>
+                    <p class="mb-2 fw-semibold {{ project.dueDate and project.dueDate < date() ? 'text-danger' : '' }}">
+                        {{ project.dueDate ? project.dueDate|date('d/m/Y') : '—' }}
+                    </p>
+                    <p class="mb-1 text-muted small">Promotions</p>
+                    <div>
+                        {% for promo in project.promotions %}
+                            <span class="badge bg-secondary">{{ promo.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if project.googleDrive %}
+                        <p class="mb-1 text-muted small mt-2">Ressources</p>
+                        <a href="{{ project.googleDrive }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-folder2-open"></i> Google Drive
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% if is_granted('ROLE_TEACHER') %}
+        <div class="card-footer d-flex gap-2">
+            <a href="{{ path('app_projects_edit', {'id': project.id}) }}" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <form method="post" action="{{ path('app_projects_toggle', {'id': project.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ project.id) }}">
+                <button class="btn btn-sm {{ project.visibility ? 'btn-outline-secondary' : 'btn-outline-success' }}">
+                    <i class="bi bi-{{ project.visibility ? 'lock' : 'unlock' }}"></i>
+                    {{ project.visibility ? 'Verrouiller' : 'Débloquer' }}
+                </button>
+            </form>
+            {{ include('projects/_delete_form.html.twig') }}
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Vue étudiant : son rendu ── #}
+    {% if not is_granted('ROLE_TEACHER') and myGrade %}
+        <div class="card mb-4">
+            <div class="card-header"><strong><i class="bi bi-send"></i> Mon rendu</strong></div>
+            <div class="card-body">
+                {% if myGrade.status == constant('App\\Enum\\GradeStatus::PENDING') %}
+                    <p class="text-muted mb-3">Ce projet est débloqué, vous pouvez soumettre votre rendu.</p>
+                    {{ form_start(submissionForm) }}
+                        <div class="mb-3">
+                            {{ form_label(submissionForm.submission, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(submissionForm.submission, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Soumettre
+                        </button>
+                    {{ form_end(submissionForm) }}
+
+                {% elseif myGrade.status == constant('App\\Enum\\GradeStatus::SUBMITTED') %}
+                    <div class="alert alert-info mb-2">
+                        <i class="bi bi-clock-history"></i> Rendu soumis — en attente de correction.
+                    </div>
+                    <p class="mb-0 text-muted small">Lien soumis : <a href="{{ myGrade.submission }}" target="_blank">{{ myGrade.submission }}</a></p>
+
+                {% elseif myGrade.status == constant('App\\Enum\\GradeStatus::GRADED') %}
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check-circle"></i> Projet noté.
+                    </div>
+                    <table class="table table-sm mb-0">
+                        <tr><th>Note</th><td>{{ myGrade.grade ?? '—' }}</td></tr>
+                        <tr><th>Commentaire</th><td>{{ myGrade.comments ?? '—' }}</td></tr>
+                        <tr><th>Rendu</th><td><a href="{{ myGrade.submission }}" target="_blank">{{ myGrade.submission }}</a></td></tr>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {# ── Vue prof : tous les rendus ── #}
+    {% if is_granted('ROLE_TEACHER') %}
+        <h5 class="mb-3">Rendus des étudiants <span class="badge bg-secondary">{{ grades|length }}</span></h5>
+        {% if grades is empty %}
+            <p class="text-muted">Aucun rendu enregistré. Débloquez le projet pour que les étudiants puissent soumettre.</p>
+        {% else %}
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Statut</th>
+                    <th>Note</th>
+                    <th>Rendu</th>
+                    <th>Mis à jour</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for grade in grades %}
+                <tr>
+                    <td>{{ grade.student.firstname }} {{ grade.student.lastname }}</td>
+                    <td>
+                        {% if grade.status == constant('App\\Enum\\GradeStatus::PENDING') %}
+                            <span class="badge bg-secondary">En attente</span>
+                        {% elseif grade.status == constant('App\\Enum\\GradeStatus::SUBMITTED') %}
+                            <span class="badge bg-warning text-dark">Soumis</span>
+                        {% else %}
+                            <span class="badge bg-success">Noté</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ grade.grade ?? '—' }}</td>
+                    <td>
+                        {% if grade.submission %}
+                            <a href="{{ grade.submission }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-1">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted small">{{ grade.updateHistory ? grade.updateHistory|date('d/m/Y H:i') : '—' }}</td>
+                    <td class="d-flex gap-1">
+                        <a href="{{ path('app_grades_edit', {'id': grade.id}) }}" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Noter
+                        </a>
+                        {% if grade.status == constant('App\\Enum\\GradeStatus::SUBMITTED') %}
+                            <form method="post" action="{{ path('app_projects_sendback', {'id': project.id, 'gradeId': grade.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('sendback' ~ grade.id) }}">
+                                <button class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Renvoyer
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    {% endif %}
+
+</turbo-frame>
+{% endblock %}

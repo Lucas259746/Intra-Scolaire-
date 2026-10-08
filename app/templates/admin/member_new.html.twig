@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau membre{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Nouveau membre</h2>
+        <a href="{{ path('app_admin_members') }}" class="btn btn-outline-secondary btn-sm" data-turbo-frame="main-frame">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {{ form_start(form, {'action': path('app_admin_members_new'), 'attr': {'novalidate': 'novalidate', 'class': 'dashboard-form'}}) }}
+        <div class="dashboard-form-shell dashboard-form-shell-compact">
+            <div class="dashboard-form-intro">
+                <span class="pill">Administration</span>
+                <p class="dashboard-note">Cree un compte membre et attribue son role des le depart.</p>
+            </div>
+
+            {% if form_errors(form) %}
+                <div class="dashboard-flash dashboard-flash-danger">
+                    {{ form_errors(form) }}
+                </div>
+            {% endif %}
+
+            <div class="dashboard-form-fields">
+                <div>
+                    {{ form_label(form.firstname) }}
+                    {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.firstname) }}
+                </div>
+                <div>
+                    {{ form_label(form.lastname) }}
+                    {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.lastname) }}
+                </div>
+                <div>
+                    {{ form_label(form.email) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.email) }}
+                </div>
+                <div>
+                    {{ form_label(form.plainPassword) }}
+                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.plainPassword) }}
+                </div>
+                <div>
+                    {{ form_label(form.role) }}
+                    {{ form_widget(form.role, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.role) }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="btn btn-primary">Creer le membre</button>
+                <a href="{{ path('app_admin_members') }}" class="btn btn-outline-secondary" data-turbo-frame="main-frame">Annuler</a>
+            </div>
+        </div>
+    {{ form_end(form) }}
+</turbo-frame>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle notification{% endblock %}
+
+{% block body %}
+<turbo-frame id="main-frame">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Nouvelle notification</h2>
+        <a href="{{ path('app_notifications_index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {{ include('notifications/_form.html.twig', {'form_action': path('app_notifications_new')}) }}
+</turbo-frame>
+{% endblock %}

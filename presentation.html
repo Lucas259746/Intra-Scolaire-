@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L'intra-scolaire Symfony</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <link rel="stylesheet" href="presentation.css" />
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- SLIDE 1 : TITRE -->
+    <section>
+      <div class="slide-title">
+        <h1>Intra <span>Scolaire</span></h1>
+        <p class="tagline">Application de gestion scolaire interne</p>
+        <div class="divider"></div>
+        <div class="slide-footer">
+          <div class="footer-block">
+            <span class="footer-label">L'équipe</span>
+            <span class="footer-value">
+              Josselin, Harouna, Mohamed-Anime<br />
+              Ahmad, Samuel, Lucas, Cosmin
+            </span>
+          </div>
+          <div class="footer-block">
+            <span class="footer-label">Stack technique</span>
+            <div class="badge-row">
+              <span class="badge">PHP 8.4</span>
+              <span class="badge">Symfony 8</span>
+              <span class="badge">PostgreSQL</span>
+              <span class="badge">Docker</span>
+              <span class="badge">Twig</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 : PRÉSENTATION -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Contexte</span>
+          <h2>Présentation du projet</h2>
+        </div>
+        <div class="two-cols">
+          <div class="col-card col-problem">
+            <p class="col-label">Problème</p>
+            <ul>
+              <li>Outils numériques fragmentés</li>
+              <li>Communications sur plusieurs canaux non reliés</li>
+              <li>Aucune vue centralisée pour l'établissement</li>
+              <li>Saisies redondantes entre logiciels</li>
+            </ul>
+          </div>
+          <div class="col-card col-solution">
+            <p class="col-label">Solution</p>
+            <ul>
+              <li>Intranet scolaire unifié</li>
+              <li>Gestion pédagogique &amp; administrative centralisée</li>
+              <li>Système multi-rôles (Admin, Formateur, Étudiant, Visiteur)</li>
+              <li>Conforme RGPD &amp; accessible RGAA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 : ENVIRONNEMENT & LICENCE -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Technique</span>
+          <h2>Environnement de développement &amp; Licence</h2>
+        </div>
+        <div class="two-cols">
+          <div class="col-card col-solution">
+            <p class="col-label">Environnement Docker</p>
+            <ul>
+              <li><strong>app</strong> — conteneur Symfony / PHP 8.4</li>
+              <li><strong>webserver</strong> — Nginx stable, port <code>8080</code></li>
+              <li><strong>database</strong> — PostgreSQL 16 Alpine, port <code>5432</code></li>
+              <li><strong>adminer</strong> — interface BDD, port <code>8081</code></li>
+              <li>Réseau interne <code>symfony_network</code> (bridge)</li>
+              <li>Volumes persistants : données BDD, cache, vendor, logs</li>
+            </ul>
+          </div>
+          <div class="col-card col-problem">
+            <p class="col-label" style="color:#f87171;">Licence — AGPL-3.0</p>
+            <ul>
+              <li>GNU Affero General Public License v3</li>
+              <li>Licence <strong>copyleft</strong> — toute modification doit rester open source</li>
+              <li>Obligation de partager le code même si utilisé comme service web</li>
+              <li>Protège le projet contre une utilisation propriétaire fermée</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 : LES RÔLES -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Accès &amp; permissions</span>
+          <h2>Les rôles de l'application</h2>
+        </div>
+        <div class="roles-grid">
+          <div class="role-card role-student">
+            <div class="role-top">
+              <span class="role-icon">&#127891;</span>
+              <span class="role-name">Étudiant</span>
+            </div>
+            <ul>
+              <li>Signer sa présence quotidienne</li>
+              <li>Consulter ses notes &amp; projets</li>
+              <li>Déposer ses documents</li>
+              <li>Recevoir des notifications</li>
+            </ul>
+          </div>
+          <div class="role-card role-teacher">
+            <div class="role-top">
+              <span class="role-icon">&#128218;</span>
+              <span class="role-name">Formateur</span>
+            </div>
+            <ul>
+              <li>Gérer les feuilles de présence</li>
+              <li>Créer &amp; noter les projets</li>
+              <li>Gérer les absences</li>
+              <li>Envoyer des notifications</li>
+            </ul>
+          </div>
+          <div class="role-card role-visitor">
+            <div class="role-top">
+              <span class="role-icon">&#128065;</span>
+              <span class="role-name">Visiteur</span>
+            </div>
+            <ul>
+              <li>Accès lecture seule</li>
+              <li>Aucune modification possible</li>
+            </ul>
+          </div>
+          <div class="role-card role-admin">
+            <div class="role-top">
+              <span class="role-icon">&#9881;</span>
+              <span class="role-name">Administrateur</span>
+            </div>
+            <ul>
+              <li>Accès complet à tout</li>
+              <li>Gérer les comptes &amp; les rôles</li>
+              <li>Affecter les promotions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 : AUTHENTIFICATION & SÉCURITÉ -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Authentification &amp; Sécurité</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Connexion</p>
+              <ul>
+                <li>Login / mot de passe hashé (bcrypt)</li>
+                <li>Inscription publique sur <code>/register</code></li>
+                <li>Validation email obligatoire à l'inscription (format html5)</li>
+                <li>Protection CSRF sur tous les formulaires</li>
+                <li>Rate limiting : 3 tentatives max / 30 min</li>
+                <li>Rôle &amp; promotion assignés par l'admin</li>
+              </ul>
+            </div>
+            <div class="aside-rows-wrap">
+              <p class="aside-title">Qui fait quoi ?</p>
+              <div class="aside-row">
+                <span class="aside-role student">Étudiant</span>
+                <span class="aside-desc">Se connecte, gère son profil</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role teacher">Formateur</span>
+                <span class="aside-desc">Se connecte, gère son profil</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role visitor">Visiteur</span>
+                <span class="aside-desc">Se connecte, accès lecture seule sur les cours , les absences</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role admin">Admin</span>
+                <span class="aside-desc">Crée les comptes, attribue les rôles</span>
+              </div>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Pare-feu global <span class="code-file">security.yaml</span></p>
+              <pre><code class="language-yaml">login_throttling:
+    max_attempts: 3
+    interval: '30 minutes'
+
+access_control:
+  - { path: ^/login,    roles: PUBLIC_ACCESS }
+  - { path: ^/register, roles: PUBLIC_ACCESS }
+  - { path: ^/,         roles: ROLE_USER }</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Attribut sur la route <span class="code-file">AttendanceController.php</span></p>
+              <pre><code class="language-php">#[Route('/attendance')]
+#[IsGranted('ROLE_TEACHER')]
+public function index(...): Response { ... }</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Validation email à l'inscription <span class="code-file">RegistrationFormType.php</span></p>
+              <pre><code class="language-php">->add('email', null, [
+    'constraints' => [
+        new NotBlank(message: 'Veuillez entrer un email.'),
+        new Email(mode: 'html5',
+            message: 'L\'adresse email n\'est pas valide.'),
+    ],
+])</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6 : PRÉSENCE & SIGNATURE -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Présence &amp; Signature</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Formateur</p>
+              <ul>
+                <li>Génère la feuille d'appel du jour par promotion</li>
+                <li>Marque chaque étudiant : présent / retard / absent</li>
+                <li>Valide les demandes de signature des étudiants</li>
+                <li>Peut réinitialiser les signatures du jour</li>
+                <li>Historique verrouillé — pas de modification des jours passés</li>
+              </ul>
+            </div>
+            <div class="aside-rows-wrap">
+              <p class="aside-title">Étudiant</p>
+              <div class="aside-row">
+                <span class="aside-role student">Signe</span>
+                <span class="aside-desc">Présent, retard ou absent — en attente de validation</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role teacher">Justificatif</span>
+                <span class="aside-desc">Peut joindre un document directement à sa signature</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role admin">Auto</span>
+                <span class="aside-desc">L'absence est créée et le justificatif transféré automatiquement</span>
+              </div>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Page réservée aux étudiants <span class="code-file">AttendanceController.php</span></p>
+              <pre><code class="language-php">if ($this->isGranted('ROLE_TEACHER') || $this->isGranted('ROLE_ADMIN')) {
+    throw $this->createAccessDeniedException(
+        "Cette page est réservée aux étudiants."
+    );
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Justificatif transféré à l'absence <span class="code-file">AttendanceController.php</span></p>
+              <pre><code class="language-php">if ($statusEnum === AttendanceType::ABSENT) {
+    $absence = new Absences();
+    $absence->setUser($student);
+    // transfert du doc joint à la signature
+    if ($pendingSignature->getDocument()) {
+        $absence->setDocument($pendingSignature->getDocument());
+    }
+    $entityManager->persist($absence);
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7 : NOTES & PROJETS -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Notes &amp; Projets</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Formateur</p>
+              <ul>
+                <li>Crée des projets et les assigne à des promotions</li>
+                <li>Active / désactive la visibilité pour les étudiants</li>
+                <li>Consulte et note les rendus soumis</li>
+                <li>Peut renvoyer un rendu pour révision</li>
+              </ul>
+            </div>
+            <div class="aside-rows-wrap">
+              <p class="aside-title">Étudiant — cycle de statut</p>
+              <div class="aside-row">
+                <span class="aside-role student">PENDING</span>
+                <span class="aside-desc">Projet visible, en attente de rendu</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role teacher">SUBMITTED</span>
+                <span class="aside-desc">Rendu soumis, en attente de correction</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role admin">GRADED</span>
+                <span class="aside-desc">Note attribuée par le formateur</span>
+              </div>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Soumission du rendu <span class="code-file">ProjectsController.php</span></p>
+              <pre><code class="language-php">if ($form->isSubmitted() && $form->isValid()) {
+    $grade->setStatus(GradeStatus::SUBMITTED);
+    $grade->setUpdateHistory(new DateTime());
+    $entityManager->flush();
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Renvoi pour révision <span class="code-file">ProjectsController.php</span></p>
+              <pre><code class="language-php">$grade->setStatus(GradeStatus::PENDING);
+$grade->setSubmission(null);
+$grade->setUpdateHistory(new DateTime());
+$entityManager->flush();</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8 : DOCUMENTS -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Documents</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Formateur</p>
+              <ul>
+                <li>Dépose des documents pour ses étudiants</li>
+                <li>Consulte tous les documents du système</li>
+                <li>Peut modifier ou supprimer n'importe quel document</li>
+              </ul>
+            </div>
+            <div class="feature-block">
+              <p class="feature-block-title">Étudiant</p>
+              <ul>
+                <li>Dépose ses propres documents (justificatifs…)</li>
+                <li>Peut joindre un document à sa signature de présence</li>
+                <li>Ne voit que ses propres documents</li>
+                <li>Peut modifier ou supprimer uniquement les siens</li>
+              </ul>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Filtre — étudiant voit seulement les siens <span class="code-file">DocumentsController.php</span></p>
+              <pre><code class="language-php">if (!$this->isGranted('ROLE_TEACHER') && !$this->isGranted('ROLE_VISITOR')) {
+    $qb->where('d.user = :user')
+       ->setParameter('user', $this->getUser());
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Upload sécurisé avec slug <span class="code-file">DocumentsController.php</span></p>
+              <pre><code class="language-php">$safeFilename = $slugger->slug(
+    pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)
+);
+$newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+$file->move($this->getParameter('documents_directory'), $newFilename);</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Suppression du fichier physique <span class="code-file">DocumentsController.php</span></p>
+              <pre><code class="language-php">$path = $this->getParameter('documents_directory') . '/' . $document->getPath();
+if ($document->getPath() && file_exists($path)) {
+    unlink($path);
+}
+$entityManager->remove($document);</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9 : NOTIFICATIONS -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Notifications</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Formateur</p>
+              <ul>
+                <li>Envoie à sa promotion uniquement</li>
+                <li>Peut modifier ou supprimer ses propres notifications</li>
+                <li>Est automatiquement marqué comme lu à l'envoi</li>
+              </ul>
+            </div>
+            <div class="feature-block">
+              <p class="feature-block-title">Admin</p>
+              <ul>
+                <li>Envoie à tous les étudiants, tous les formateurs ou tous les utilisateurs</li>
+              </ul>
+            </div>
+            <div class="aside-rows-wrap">
+              <p class="aside-title">Destinataires possibles</p>
+              <div class="aside-row">
+                <span class="aside-role student">students</span>
+                <span class="aside-desc">Tous les étudiants</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role teacher">teachers</span>
+                <span class="aside-desc">Tous les formateurs</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role visitor">promotion</span>
+                <span class="aside-desc">Une promotion spécifique</span>
+              </div>
+              <div class="aside-row">
+                <span class="aside-role admin">all</span>
+                <span class="aside-desc">Tous (admin uniquement)</span>
+              </div>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Formateur limité à sa promo <span class="code-file">NotificationsController.php</span></p>
+              <pre><code class="language-php">if (!$this->isGranted('ROLE_ADMIN')) {
+    if ($audience !== 'promotion') {
+        throw $this->createAccessDeniedException();
+    }
+    if ($promotion->getProfessor()?->getId() !== $currentUser->getId()) {
+        throw $this->createAccessDeniedException();
+    }
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Ciblage des destinataires <span class="code-file">NotificationsController.php</span></p>
+              <pre><code class="language-php">$recipients = match ($audience) {
+    'students'  => $userRepository->findByRole('ROLE_STUDENT'),
+    'teachers'  => $userRepository->findByRole('ROLE_TEACHER'),
+    'promotion' => array_map(fn($pu) => $pu->getUser(),
+                    $promotion->getPromotionUsers()->toArray()),
+    default     => $userRepository->findAll(),
+};</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10 : ADMINISTRATION -->
+    <section>
+      <div class="slide-content">
+        <div class="slide-header">
+          <span class="slide-tag">Fonctionnalité</span>
+          <h2>Administration</h2>
+        </div>
+        <div class="auth-layout">
+          <div class="auth-left">
+            <div class="feature-block">
+              <p class="feature-block-title">Formateur</p>
+              <ul>
+                <li>Consulte la liste de ses étudiants</li>
+                <li>Filtre par promotion ou par recherche</li>
+                <li>Voit la fiche d'un étudiant de sa promo</li>
+              </ul>
+            </div>
+            <div class="feature-block">
+              <p class="feature-block-title">Admin uniquement</p>
+              <ul>
+                <li>Vue globale de tous les étudiants &amp; membres</li>
+                <li>Change le rôle d'un utilisateur</li>
+                <li>Affecte ou retire des promotions</li>
+                <li>Crée de nouveaux comptes (formateur, admin, visiteur)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="auth-right">
+            <div class="code-block">
+              <p class="code-label">Changement de rôle sécurisé <span class="code-file">AdminController.php</span></p>
+              <pre><code class="language-php">#[IsGranted('ROLE_ADMIN')]
+public function setRole(Request $request, User $user, ...): Response
+{
+    $allowedRoles = ['ROLE_STUDENT', 'ROLE_TEACHER', 'ROLE_ADMIN', 'ROLE_VISITOR'];
+    $role = $request->getPayload()->getString('role');
+    if (!in_array($role, $allowedRoles, true)) {
+        throw $this->createNotFoundException('Rôle invalide.');
+    }
+    $user->setRoles([$role]);
+    $em->flush();
+}</code></pre>
+            </div>
+            <div class="code-block">
+              <p class="code-label">Affectation de promotions <span class="code-file">AdminController.php</span></p>
+              <pre><code class="language-php">foreach ($user->getPromotionUsers() as $oldLink) {
+    $em->remove($oldLink);
+}
+foreach ($selectedPromotions as $p) {
+    $pu = new PromotionUsers();
+    $pu->setUser($user);
+    $pu->setPromotion($p);
+    $em->persist($pu);
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    controls: true,
+    progress: true,
+    center: true,
+    plugins: [ RevealHighlight ],
+  });
+</script>
+</body>
+</html>
